@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default function Expandable(props: Props) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const { children } = props;
   const ref = useRef();
   const rect = useRect(ref);
