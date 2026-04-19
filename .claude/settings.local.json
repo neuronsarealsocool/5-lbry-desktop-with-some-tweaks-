@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(C:/Users/matt/AppData/Local/Temp/gh-cli/bin/gh.exe api *)"
+    ]
+  }
+}

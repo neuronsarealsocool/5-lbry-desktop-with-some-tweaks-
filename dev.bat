@@ -1,0 +1,3 @@
+@echo off
+echo Starting LBRY Desktop in development mode...
+node .yarn/releases/yarn-3.2.0.cjs dev
