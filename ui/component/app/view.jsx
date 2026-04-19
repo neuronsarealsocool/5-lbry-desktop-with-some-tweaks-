@@ -23,6 +23,7 @@ import Nag from 'component/common/nag';
 
 import SyncFatalError from 'component/syncFatalError';
 import Yrbl from 'component/yrbl';
+import ZoomControls from 'component/zoomControls';
 
 // ****************************************************************************
 
@@ -351,6 +352,7 @@ function App(props: Props) {
       <FileDrop />
       <FileRenderFloating />
       {isEnhancedLayout && <Yrbl className="yrbl--enhanced" />}
+      <ZoomControls />
 
       {showUpgradeButton && !isUpdateModalDisplayed && (
         <Nag
