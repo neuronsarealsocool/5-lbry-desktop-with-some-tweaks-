@@ -491,6 +491,7 @@ function PublishForm(props: Props) {
               setWaitForFile={setWaitForFile}
               channelId={claimChannelId}
               header={null}
+              hideMeta
             />
           </div>
         </div>

@@ -42,6 +42,7 @@ type Props = {
   channelId: string,
   setWaitForFile: (boolean) => void,
   hideEditor?: boolean,
+  hideMeta?: boolean,
 };
 
 function PublishFile(props: Props) {
@@ -69,6 +70,7 @@ function PublishFile(props: Props) {
     header,
     subtitle,
     hideEditor,
+    hideMeta,
   } = props;
 
   const RECOMMENDED_BITRATE = 6000000;
@@ -324,16 +326,18 @@ function PublishFile(props: Props) {
       subtitle={subtitle || (isStillEditing && __('You are currently editing your upload.'))}
       actions={
         <React.Fragment>
-          <PublishName uri={uri} />
-          <FormField
-            type="text"
-            name="content_title"
-            label={__('Title')}
-            placeholder={__('Descriptive titles work best')}
-            disabled={disabled}
-            value={title}
-            onChange={handleTitleChange}
-          />
+          {!hideMeta && <PublishName uri={uri} />}
+          {!hideMeta && (
+            <FormField
+              type="text"
+              name="content_title"
+              label={__('Title')}
+              placeholder={__('Descriptive titles work best')}
+              disabled={disabled}
+              value={title}
+              onChange={handleTitleChange}
+            />
+          )}
           {showFileUpload && (
             <>
               <FileSelector
