@@ -222,6 +222,7 @@ function PublishForm(props: Props) {
     : formValidLessFile;
 
   const [previewing, setPreviewing] = React.useState(false);
+  const [step, setStep] = React.useState(1);
 
   useEffect(() => {
     if (!hasClaimedInitialRewards) {
@@ -333,6 +334,10 @@ function PublishForm(props: Props) {
       updatePublishForm({ channel: activeChannelName });
     }
   }, [activeChannelName, incognito, updatePublishForm]);
+
+  useEffect(() => {
+    setStep(1);
+  }, [mode]);
 
   // set mode based on urlParams 'type'
   useEffect(() => {
@@ -455,6 +460,44 @@ function PublishForm(props: Props) {
       </div>
     );
   }
+  // POST step 1 — full-screen editor
+  if (mode === PUBLISH_MODES.POST && step === 1) {
+    return (
+      <div className="publish-post-editor__overlay">
+        <div className="publish-post-editor__topbar">
+          <div className="publish-post-editor__topbar-left">
+            <ChannelSelect disabled={disabled} />
+          </div>
+          <div className="publish-post-editor__topbar-right">
+            <Button
+              button="primary"
+              label={__('Next')}
+              disabled={emptyPostError}
+              onClick={() => setStep(2)}
+            />
+          </div>
+        </div>
+        <div className="publish-post-editor__scroll-area">
+          <div className="publish-post-editor__document">
+            <PublishFile
+              uri={permanentUrl}
+              mode={mode}
+              fileMimeType={fileMimeType}
+              disabled={disabled || publishing}
+              inProgress={isInProgress}
+              setPublishMode={setMode}
+              setPrevFileText={setPrevFileText}
+              subtitle={null}
+              setWaitForFile={setWaitForFile}
+              channelId={claimChannelId}
+              header={null}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Editing claim uri
   return (
     <div className="card-stack">
@@ -471,6 +514,7 @@ function PublishForm(props: Props) {
         subtitle={customSubtitle}
         setWaitForFile={setWaitForFile}
         channelId={claimChannelId}
+        hideEditor={mode === PUBLISH_MODES.POST}
         header={
           <>
             {AVAILABLE_MODES.map((modeName) => (
@@ -530,6 +574,9 @@ function PublishForm(props: Props) {
       )}
       <section>
         <div className="section__actions">
+          {mode === PUBLISH_MODES.POST && (
+            <Button button="alt" label={__('Back')} onClick={() => setStep(1)} />
+          )}
           <Button
             button="primary"
             onClick={handlePublish}

@@ -41,6 +41,7 @@ type Props = {
   header: Node,
   channelId: string,
   setWaitForFile: (boolean) => void,
+  hideEditor?: boolean,
 };
 
 function PublishFile(props: Props) {
@@ -67,6 +68,7 @@ function PublishFile(props: Props) {
     setPrevFileText,
     header,
     subtitle,
+    hideEditor,
   } = props;
 
   const RECOMMENDED_BITRATE = 6000000;
@@ -381,7 +383,7 @@ function PublishFile(props: Props) {
               </I18nMessage>
             </p>
           )}
-          {isPublishPost && (
+          {isPublishPost && !hideEditor && (
             <PostEditor
               label={__('Post --[noun, markdown post tab button]--')}
               uri={uri}
