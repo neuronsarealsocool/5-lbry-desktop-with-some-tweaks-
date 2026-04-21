@@ -1,3 +1,7 @@
+// Heights of fixed chrome above the editor
+$post-editor-topbar-h: 52px;   // channel-select + Next button row
+$post-editor-toolbar-h: 42px;  // EasyMDE formatting toolbar
+
 .publish-post-editor__overlay {
   position: fixed;
   top: var(--header-height);
@@ -12,10 +16,11 @@
 }
 
 .publish-post-editor__topbar {
+  height: $post-editor-topbar-h;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-s) var(--spacing-l);
+  padding: 0 var(--spacing-l);
   background-color: var(--color-header-background);
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
@@ -43,6 +48,7 @@
   width: 100%;
   overflow: hidden;
 
+  // Strip Card chrome — section > .card__first-pane > .card__main-actions
   .card {
     flex: 1;
     display: flex;
@@ -51,6 +57,12 @@
     border-radius: 0;
     overflow: hidden;
     box-shadow: none;
+  }
+
+  .card__first-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .card__main-actions {
@@ -66,28 +78,58 @@
     display: none;
   }
 
+  // Propagate flex through SimpleMDE wrapper chain
+  .form-field--SimpleMDE {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  fieldset-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  // Hide the label row (not needed in full-screen mode)
+  .form-field__two-column {
+    display: none;
+  }
+
+  .EasyMDEContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .editor-toolbar {
+    height: $post-editor-toolbar-h;
+    background-color: var(--color-header-background);
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    padding: 0 var(--spacing-l);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  // Force CodeMirror to fill remaining height
   .CodeMirror {
     flex: 1;
+    height: 0 !important; // override CM default; flex-grow handles actual size
     border: none;
     border-radius: 0;
     background: var(--color-background);
     font-size: 1rem;
     line-height: 1.7;
-    height: 100%;
     color: var(--color-text);
   }
 
   .CodeMirror-scroll {
-    height: 100%;
-    min-height: unset;
-  }
-
-  .editor-toolbar {
-    background-color: var(--color-header-background);
-    border: none;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
-    padding: var(--spacing-xxs) var(--spacing-l);
-    flex-shrink: 0;
+    height: 100% !important;
+    min-height: unset !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 }
