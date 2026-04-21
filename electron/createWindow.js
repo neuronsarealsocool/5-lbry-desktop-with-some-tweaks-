@@ -173,6 +173,27 @@ export default appState => {
 
   window.webContents.on('did-finish-load', () => {
     window.webContents.insertCSS(`
+      /* Post editor: force full-height CodeMirror via flex chain */
+      .publish-post-editor__document .card,
+      .publish-post-editor__document .card__first-pane,
+      .publish-post-editor__document .card__main-actions,
+      .publish-post-editor__document .form-field--SimpleMDE,
+      .publish-post-editor__document fieldset-section,
+      .publish-post-editor__document .EasyMDEContainer {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .publish-post-editor__document .CodeMirror {
+        flex: 1 !important;
+        height: 0 !important;
+      }
+      .publish-post-editor__document .CodeMirror-scroll {
+        height: 100% !important;
+        min-height: unset !important;
+        overflow-y: auto !important;
+      }
+
       *::-webkit-scrollbar-button { display: block; background-color: transparent; }
       *::-webkit-scrollbar-button:start:increment,
       *::-webkit-scrollbar-button:end:decrement { display: none; }
