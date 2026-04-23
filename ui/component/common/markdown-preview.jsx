@@ -135,6 +135,18 @@ const schema = { ...defaultSchema };
 schema.protocols.href.push('lbry');
 schema.attributes.a.push('embed');
 
+// Allow HTML layout/formatting tags (center, iframe for YouTube etc.)
+schema.tagNames = [...schema.tagNames, 'center', 'iframe', 'span'];
+
+// Allow style and align attributes on every element (for Obsidian-style HTML formatting)
+schema.attributes['*'] = [...(schema.attributes['*'] || []), 'align', 'style'];
+
+// Allow iframe attributes (src already covered by protocols.src: ['http','https'])
+schema.attributes.iframe = [
+  'src', 'width', 'height', 'frameborder', 'allowfullscreen',
+  'allow', 'title', 'loading', 'style',
+];
+
 const REPLACE_REGEX = /(<iframe\s+src=["'])(.*?(?=))(["']\s*><\/iframe>)/g;
 
 // ****************************************************************************
