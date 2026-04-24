@@ -135,17 +135,27 @@ const schema = { ...defaultSchema };
 schema.protocols.href.push('lbry');
 schema.attributes.a.push('embed');
 
-// Allow HTML layout/formatting tags (center, iframe for YouTube etc.)
-schema.tagNames = [...schema.tagNames, 'center', 'iframe', 'span'];
+// Allow HTML layout/formatting tags
+schema.tagNames = [...schema.tagNames, 'center', 'iframe', 'mark', 'font', 'span', 'video', 'audio', 'source'];
 
-// Allow style and align attributes on every element (for Obsidian-style HTML formatting)
-schema.attributes['*'] = [...(schema.attributes['*'] || []), 'align', 'style'];
+// Allow formatting/layout attributes on all elements
+schema.attributes['*'] = [...(schema.attributes['*'] || []), 'align', 'style', 'color', 'width', 'height'];
 
-// Allow iframe attributes (src already covered by protocols.src: ['http','https'])
+// Allow iframe attributes
 schema.attributes.iframe = [
   'src', 'width', 'height', 'frameborder', 'allowfullscreen',
-  'allow', 'title', 'loading', 'style',
+  'allow', 'title', 'loading', 'style', 'referrerpolicy',
 ];
+
+// Strip dangerous HTML (scripts, event handlers) while leaving formatting HTML intact.
+// Used for isMarkdownPost rendering which needs raw HTML pass-through.
+function removeDangerousHtml(str) {
+  return str
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<\s*\/?\s*script[^>]*>/gi, '')
+    .replace(/\s(on\w+)\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/\s(on\w+)\s*=[^\s>]*/gi, '');
+}
 
 const REPLACE_REGEX = /(<iframe\s+src=["'])(.*?(?=))(["']\s*><\/iframe>)/g;
 
@@ -190,8 +200,14 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
       })
     : '';
 
+  // For full markdown posts, pre-strip dangerous HTML then let remark pass the
+  // remaining HTML (center, mark, iframe, etc.) through to the browser.
+  // For comments/descriptions, keep the normal schema-based sanitisation.
+  const postContent = isMarkdownPost ? removeDangerousHtml(strippedContent) : strippedContent;
+
   const remarkOptions: Object = {
-    sanitize: schema,
+    sanitize: isMarkdownPost ? false : schema,
+    toHast: isMarkdownPost ? { allowDangerousHtml: true } : {},
     fragment: React.Fragment,
     remarkReactComponents: {
       a: noDataStore
@@ -263,7 +279,7 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
           .use(remarkBreaks)
           .use(remarkFrontMatter, ['yaml'])
           .use(reactRenderer, remarkOptions)
-          .processSync(strippedContent).contents
+          .processSync(postContent).contents
       }
     </div>
   );
