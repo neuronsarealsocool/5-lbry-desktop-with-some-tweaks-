@@ -157,7 +157,40 @@ function removeDangerousHtml(str) {
     .replace(/\s(on\w+)\s*=[^\s>]*/gi, '');
 }
 
+// Ensure rawhtml elements (and their children) are fully removed in sanitized
+// contexts (comments, descriptions) so raw HTML never leaks as text.
+schema.strip = [...(schema.strip || []), 'rawhtml'];
+
 const REPLACE_REGEX = /(<iframe\s+src=["'])(.*?(?=))(["']\s*><\/iframe>)/g;
+
+// Converts MDAST `html` nodes to HAST `rawhtml` elements via
+// mdast-util-to-hast's official data.hName / data.hChildren hooks.
+// hast-to-hyperscript only handles `element` and `text` nodes — this is
+// the only way to get raw HTML blocks to reach a React component.
+function remarkHtmlPassthrough() {
+  return function transformer(tree) {
+    function walk(node) {
+      if (!node.children) return;
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (child.type === 'html') {
+          node.children[i] = {
+            type: 'html',
+            value: child.value,
+            position: child.position,
+            data: {
+              hName: 'rawhtml',
+              hChildren: [{ type: 'text', value: child.value }],
+            },
+          };
+        } else {
+          walk(child);
+        }
+      }
+    }
+    walk(tree);
+  };
+}
 
 // ****************************************************************************
 // ****************************************************************************
@@ -207,7 +240,6 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
 
   const remarkOptions: Object = {
     sanitize: isMarkdownPost ? false : schema,
-    toHast: isMarkdownPost ? { allowDangerousHtml: true } : {},
     fragment: React.Fragment,
     remarkReactComponents: {
       a: noDataStore
@@ -233,6 +265,12 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
         ) : (
           <SimpleImageLink src={imgProps.src} alt={imgProps.alt} title={imgProps.title} />
         ),
+      // Renders raw HTML blocks in markdown posts only (stripped in comments/descriptions)
+      rawhtml: ({ children }) => {
+        if (!isMarkdownPost) return null;
+        const html = Array.isArray(children) ? children.join('') : (children || '');
+        return <div dangerouslySetInnerHTML={{ __html: removeDangerousHtml(html) }} />;
+      },
     },
   };
 
@@ -265,6 +303,8 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
       {
         remark()
           .use(remarkAttr, remarkAttrOpts)
+          // Convert html MDAST nodes to rawhtml HAST elements before any other processing
+          .use(remarkHtmlPassthrough)
           // Remark plugins for lbry urls
           // Note: The order is important
           .use(formattedLinks)
