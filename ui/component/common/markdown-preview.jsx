@@ -176,6 +176,35 @@ const toHastHtmlHandler = (h, node) => ({
   children: [{ type: 'text', value: node.value }],
 });
 
+// Remark plugin: remark parses inline HTML tags (e.g. <mark>, <font>) as
+// separate MDAST `html` nodes within a paragraph, which means
+// <mark style="..."><font color="...">red</font></mark> becomes 5 separate
+// nodes — each wrapped in its own div — breaking the nesting.
+// This plugin merges paragraphs whose children are *only* html/text nodes
+// into a single block `html` node so the tags survive intact.
+function remarkHtmlParagraphFix() {
+  return function transformer(tree) {
+    function walk(node) {
+      if (!node.children) return;
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        const child = node.children[i];
+        if (child.type === 'paragraph' && child.children) {
+          const allHtmlOrText = child.children.every(function (c) {
+            return c.type === 'html' || c.type === 'text';
+          });
+          if (allHtmlOrText && child.children.some(function (c) { return c.type === 'html'; })) {
+            const html = child.children.map(function (c) { return c.value; }).join('');
+            node.children.splice(i, 1, { type: 'html', value: html, position: child.position });
+          }
+        } else {
+          walk(child);
+        }
+      }
+    }
+    walk(tree);
+  };
+}
+
 // ****************************************************************************
 // ****************************************************************************
 
@@ -292,6 +321,9 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
       {
         remark()
           .use(remarkAttr, remarkAttrOpts)
+          // Merge inline-HTML-only paragraphs into a single html node so that
+          // tags like <mark style="..."> survive the pipeline intact.
+          .use(isMarkdownPost ? remarkHtmlParagraphFix : null)
           // Remark plugins for lbry urls
           // Note: The order is important
           .use(formattedLinks)
