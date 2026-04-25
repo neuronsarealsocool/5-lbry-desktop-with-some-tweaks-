@@ -254,6 +254,8 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
         ),
       // Renders raw HTML blocks in markdown posts only (stripped in comments/descriptions)
       rawhtml: ({ children }) => {
+        // eslint-disable-next-line no-console
+        console.warn('[MarkdownPreview] rawhtml called. isMarkdownPost=', isMarkdownPost, 'children=', children);
         if (!isMarkdownPost) return null;
         const html = Array.isArray(children) ? children.join('') : (children || '');
         return <div dangerouslySetInnerHTML={{ __html: removeDangerousHtml(html) }} />;
