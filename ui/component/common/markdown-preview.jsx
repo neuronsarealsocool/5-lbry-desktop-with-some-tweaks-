@@ -163,34 +163,18 @@ schema.strip = [...(schema.strip || []), 'rawhtml'];
 
 const REPLACE_REGEX = /(<iframe\s+src=["'])(.*?(?=))(["']\s*><\/iframe>)/g;
 
-// Converts MDAST `html` nodes to HAST `rawhtml` elements via
-// mdast-util-to-hast's official data.hName / data.hChildren hooks.
-// hast-to-hyperscript only handles `element` and `text` nodes — this is
-// the only way to get raw HTML blocks to reach a React component.
-function remarkHtmlPassthrough() {
-  return function transformer(tree) {
-    function walk(node) {
-      if (!node.children) return;
-      for (let i = 0; i < node.children.length; i++) {
-        const child = node.children[i];
-        if (child.type === 'html') {
-          node.children[i] = {
-            type: 'html',
-            value: child.value,
-            position: child.position,
-            data: {
-              hName: 'rawhtml',
-              hChildren: [{ type: 'text', value: child.value }],
-            },
-          };
-        } else {
-          walk(child);
-        }
-      }
-    }
-    walk(tree);
-  };
-}
+// Custom toHast handler for MDAST `html` nodes.
+// mdast-util-to-hast's default html handler returns null (or a raw node with
+// allowDangerousHtml) — neither survives hast-to-hyperscript which only
+// processes `element` and `text` HAST node types.
+// By overriding the handler we return a real HAST element that
+// hast-to-hyperscript can convert to a React component call.
+const toHastHtmlHandler = (h, node) => ({
+  type: 'element',
+  tagName: 'rawhtml',
+  properties: {},
+  children: [{ type: 'text', value: node.value }],
+});
 
 // ****************************************************************************
 // ****************************************************************************
@@ -240,6 +224,9 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
 
   const remarkOptions: Object = {
     sanitize: isMarkdownPost ? false : schema,
+    // Override the html MDAST handler so HTML blocks become real HAST elements
+    // (tagName: 'rawhtml') that hast-to-hyperscript can pass to our React component.
+    toHast: { handlers: { html: toHastHtmlHandler } },
     fragment: React.Fragment,
     remarkReactComponents: {
       a: noDataStore
@@ -303,8 +290,6 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
       {
         remark()
           .use(remarkAttr, remarkAttrOpts)
-          // Convert html MDAST nodes to rawhtml HAST elements before any other processing
-          .use(remarkHtmlPassthrough)
           // Remark plugins for lbry urls
           // Note: The order is important
           .use(formattedLinks)
