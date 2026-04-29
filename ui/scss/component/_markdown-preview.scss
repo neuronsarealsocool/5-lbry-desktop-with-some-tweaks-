@@ -166,17 +166,52 @@
     border: 1px solid var(--color-editor-hr-preview);
   }
 
-  // Code blocks
-  pre {
-    white-space: normal;
-    background: transparent;
-    word-break: break-all;
+  // Code blocks (fenced ```)
+  .code-block {
+    position: relative;
+    background: var(--color-editor-inline-code-bg-preview);
+    border-radius: var(--border-radius);
+    margin-top: var(--spacing-m);
+    margin-bottom: var(--spacing-m);
 
-    code {
-      margin-bottom: var(--spacing-m);
-      padding: var(--spacing-s) var(--spacing-s) calc(var(--spacing-s) - 2px);
-      display: block;
+    pre {
+      margin: 0;
+      padding: var(--spacing-m);
+      padding-right: calc(var(--spacing-m) + 2rem); // room for copy button
+      overflow-x: auto;
       white-space: pre-wrap;
+      word-break: break-all;
+      background: transparent;
+
+      code {
+        background: transparent;
+        padding: 0;
+        border-radius: 0;
+        font-size: var(--font-small);
+        display: block;
+        color: var(--color-editor-inline-code-fg-preview);
+      }
+    }
+  }
+
+  .code-block__copy-btn {
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-subtitle);
+    padding: var(--spacing-xxs);
+    border-radius: var(--border-radius);
+    line-height: 1;
+    font-size: var(--font-small);
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      color: var(--color-text);
+      background: rgba(255, 255, 255, 0.08);
     }
   }
 

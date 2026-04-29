@@ -6,6 +6,7 @@ import { formattedEmote, inlineEmote } from 'util/remark-emote';
 import * as ICONS from 'constants/icons';
 import * as React from 'react';
 import Button from 'component/button';
+import Icon from 'component/common/icon';
 import classnames from 'classnames';
 import defaultSchema from 'hast-util-sanitize/lib/github.json';
 import MarkdownLink from 'component/markdownLink';
@@ -208,6 +209,42 @@ function remarkHtmlParagraphFix() {
 // ****************************************************************************
 // ****************************************************************************
 
+const CodeBlock = ({ children }) => {
+  const [copied, setCopied] = React.useState(false);
+
+  function extractText(node) {
+    if (typeof node === 'string') return node;
+    if (Array.isArray(node)) return node.map(extractText).join('');
+    if (node && node.props && node.props.children) return extractText(node.props.children);
+    return '';
+  }
+
+  function handleCopy() {
+    const text = extractText(children);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  }
+
+  return (
+    <div className="code-block">
+      <button
+        className="code-block__copy-btn"
+        onClick={handleCopy}
+        title={copied ? __('Copied!') : __('Copy to clipboard')}
+        aria-label={__('Copy to clipboard')}
+      >
+        {copied ? __('Copied!') : <Icon icon={ICONS.COPY} size={16} />}
+      </button>
+      <pre>{children}</pre>
+    </div>
+  );
+};
+
+// ****************************************************************************
+// ****************************************************************************
+
 function isStakeEnoughForPreview(stakedLevel) {
   return !stakedLevel || stakedLevel >= CHANNEL_STAKED_LEVEL_VIDEO_COMMENTS;
 }
@@ -271,6 +308,7 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
           ),
       // Workaraund of remarkOptions.Fragment
       div: React.Fragment,
+      pre: CodeBlock,
       img: (imgProps) =>
         noDataStore ? (
           <div className="file-viewer file-viewer--document">
@@ -283,8 +321,6 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
         ),
       // Renders raw HTML blocks in markdown posts only (stripped in comments/descriptions)
       rawhtml: ({ children }) => {
-        // eslint-disable-next-line no-console
-        console.warn('[MarkdownPreview] rawhtml called. isMarkdownPost=', isMarkdownPost, 'children=', children);
         if (!isMarkdownPost) return null;
         const html = Array.isArray(children) ? children.join('') : (children || '');
         return <div dangerouslySetInnerHTML={{ __html: removeDangerousHtml(html) }} />;
