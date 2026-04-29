@@ -178,6 +178,14 @@ export default appState => {
         min-height: calc(100vh - var(--header-height) - 94px) !important;
         border: none !important;
         border-radius: 0 !important;
+        font-family: 'Arial Black', Arial, sans-serif !important;
+        font-size: 18pt !important;
+        line-height: 1.5 !important;
+      }
+
+      /* Hide horizontal scrollbar in post editor */
+      .publish-post-editor__document .CodeMirror-scroll {
+        overflow-x: hidden !important;
       }
 
       *::-webkit-scrollbar-button { display: block; background-color: transparent; }
