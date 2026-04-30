@@ -173,9 +173,8 @@ export default appState => {
 
   window.webContents.on('did-finish-load', () => {
     window.webContents.insertCSS(`
-      /* Post editor: CodeMirror always fills the full window */
+      /* Post editor: base CodeMirror styles (height set by JS below) */
       .publish-post-editor__document .CodeMirror {
-        min-height: calc(100vh - var(--header-height) - 94px) !important;
         border: none !important;
         border-radius: 0 !important;
         font-family: 'Arial Black', Arial, sans-serif !important;
@@ -209,6 +208,28 @@ export default appState => {
         background: linear-gradient(to bottom right, transparent 50%, white 50%) 0% 0% / 100% 50% no-repeat,
                     linear-gradient(to top right,    transparent 50%, white 50%) 0% 100% / 100% 50% no-repeat;
       }
+    `);
+
+    // Fit the post-editor CodeMirror to exactly fill the available scroll area.
+    // Done in JS so it uses real measured heights instead of CSS calc() guesses,
+    // which break under Windows DPI scaling.
+    window.webContents.executeJavaScript(`
+      (function () {
+        function fitEditor() {
+          var overlay = document.querySelector('.publish-post-editor__overlay');
+          if (!overlay) return;
+          var scrollArea = overlay.querySelector('.publish-post-editor__scroll-area');
+          var toolbar   = overlay.querySelector('.editor-toolbar');
+          var cm        = overlay.querySelector('.CodeMirror');
+          if (!scrollArea || !cm) return;
+          var available = scrollArea.clientHeight - (toolbar ? toolbar.offsetHeight : 0);
+          if (available > 100) cm.style.minHeight = available + 'px';
+        }
+        // Re-run whenever the DOM changes (editor mounts/unmounts) or window resizes.
+        new MutationObserver(fitEditor).observe(document.body, { subtree: true, childList: true });
+        window.addEventListener('resize', fitEditor);
+        fitEditor();
+      })();
     `);
 
     window.webContents.session.setUserAgent(`LBRY/${app.getVersion()}`);
