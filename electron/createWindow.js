@@ -181,11 +181,14 @@ export default appState => {
         border: none !important;
         border-radius: 0 !important;
         font-family: 'Arial Black', Arial, sans-serif !important;
-        font-size: 25pt !important;
+        font-size: 18pt !important;
         line-height: 1.5 !important;
       }
       .publish-post-editor__document .CodeMirror-scroll {
         overflow-x: hidden !important;
+      }
+      .publish-post-editor__document .CodeMirror-hscrollbar {
+        display: none !important;
       }
 
       *::-webkit-scrollbar-button { display: block; background-color: transparent; }
