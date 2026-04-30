@@ -203,6 +203,20 @@ export default appState => {
         display: flex !important;
         flex-direction: column !important;
       }
+      /* form-field--SimpleMDE and fieldset-section sit between card__main-actions
+         and EasyMDEContainer and were breaking the flex chain */
+      .publish-post-editor__document .form-field--SimpleMDE {
+        flex: 1 !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .publish-post-editor__document fieldset-section {
+        flex: 1 !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
       .publish-post-editor__document .EasyMDEContainer {
         flex: 1 !important;
         min-height: 0 !important;
