@@ -173,17 +173,55 @@ export default appState => {
 
   window.webContents.on('did-finish-load', () => {
     window.webContents.insertCSS(`
-      /* Post editor: base CodeMirror styles (height set by JS below) */
+      /* Post editor full-height: flex chain from scroll-area down to CodeMirror.
+         Overrides EasyMDE's display:block so the editor fills all available space. */
+      .publish-post-editor__scroll-area {
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .publish-post-editor__document {
+        flex: 1 !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .publish-post-editor__document .card {
+        flex: 1 !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .publish-post-editor__document .card__first-pane {
+        flex: 1 !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .publish-post-editor__document .card__main-actions {
+        flex: 1 !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .publish-post-editor__document .EasyMDEContainer {
+        flex: 1 !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
       .publish-post-editor__document .CodeMirror {
+        flex: 1 !important;
+        height: auto !important;
+        min-height: 0 !important;
         border: none !important;
         border-radius: 0 !important;
         font-family: 'Arial Black', Arial, sans-serif !important;
         font-size: 25pt !important;
         line-height: 1.5 !important;
       }
-
-      /* Hide horizontal scrollbar in post editor */
       .publish-post-editor__document .CodeMirror-scroll {
+        height: 100% !important;
+        min-height: 0 !important;
         overflow-x: hidden !important;
       }
 
@@ -208,31 +246,6 @@ export default appState => {
         background: linear-gradient(to bottom right, transparent 50%, white 50%) 0% 0% / 100% 50% no-repeat,
                     linear-gradient(to top right,    transparent 50%, white 50%) 0% 100% / 100% 50% no-repeat;
       }
-    `);
-
-    // Fit the post-editor CodeMirror to exactly fill the available scroll area.
-    // Uses a debounced MutationObserver so measurement happens after layout settles
-    // (clientHeight is 0 when called synchronously during a DOM mutation).
-    window.webContents.executeJavaScript(`
-      (function () {
-        var fitTimer = null;
-        function scheduleFit() {
-          if (fitTimer) clearTimeout(fitTimer);
-          fitTimer = setTimeout(doFit, 200);
-        }
-        function doFit() {
-          var overlay = document.querySelector('.publish-post-editor__overlay');
-          if (!overlay) return;
-          var scrollArea = overlay.querySelector('.publish-post-editor__scroll-area');
-          var toolbar    = overlay.querySelector('.editor-toolbar');
-          var cm         = overlay.querySelector('.CodeMirror');
-          if (!scrollArea || !cm) return;
-          var h = scrollArea.clientHeight - (toolbar ? toolbar.offsetHeight : 0);
-          if (h > 100) cm.style.minHeight = h + 'px';
-        }
-        new MutationObserver(scheduleFit).observe(document.body, { subtree: true, childList: true });
-        window.addEventListener('resize', scheduleFit);
-      })();
     `);
 
     window.webContents.session.setUserAgent(`LBRY/${app.getVersion()}`);
