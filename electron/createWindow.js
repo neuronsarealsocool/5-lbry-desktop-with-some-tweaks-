@@ -173,60 +173,11 @@ export default appState => {
 
   window.webContents.on('did-finish-load', () => {
     window.webContents.insertCSS(`
-      /* Post editor full-height: flex chain from scroll-area down to CodeMirror.
-         Overrides EasyMDE's display:block so the editor fills all available space. */
-      .publish-post-editor__scroll-area {
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      .publish-post-editor__document {
-        flex: 1 !important;
-        min-height: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      .publish-post-editor__document .card {
-        flex: 1 !important;
-        min-height: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      .publish-post-editor__document .card__first-pane {
-        flex: 1 !important;
-        min-height: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      .publish-post-editor__document .card__main-actions {
-        flex: 1 !important;
-        min-height: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      /* form-field--SimpleMDE and fieldset-section sit between card__main-actions
-         and EasyMDEContainer and were breaking the flex chain */
-      .publish-post-editor__document .form-field--SimpleMDE {
-        flex: 1 !important;
-        min-height: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      .publish-post-editor__document fieldset-section {
-        flex: 1 !important;
-        min-height: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      .publish-post-editor__document .EasyMDEContainer {
-        flex: 1 !important;
-        min-height: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-      }
+      /* Post editor: CodeMirror always fills at least the full viewport height.
+         min-height: 100vh with !important beats EasyMDE's inline height styles
+         and all intermediate container layout, regardless of DOM structure. */
       .publish-post-editor__document .CodeMirror {
-        flex: 1 !important;
-        height: auto !important;
-        min-height: 0 !important;
+        min-height: 100vh !important;
         border: none !important;
         border-radius: 0 !important;
         font-family: 'Arial Black', Arial, sans-serif !important;
@@ -234,8 +185,6 @@ export default appState => {
         line-height: 1.5 !important;
       }
       .publish-post-editor__document .CodeMirror-scroll {
-        height: 100% !important;
-        min-height: 0 !important;
         overflow-x: hidden !important;
       }
 
