@@ -211,24 +211,27 @@ export default appState => {
     `);
 
     // Fit the post-editor CodeMirror to exactly fill the available scroll area.
-    // Done in JS so it uses real measured heights instead of CSS calc() guesses,
-    // which break under Windows DPI scaling.
+    // Uses a debounced MutationObserver so measurement happens after layout settles
+    // (clientHeight is 0 when called synchronously during a DOM mutation).
     window.webContents.executeJavaScript(`
       (function () {
-        function fitEditor() {
+        var fitTimer = null;
+        function scheduleFit() {
+          if (fitTimer) clearTimeout(fitTimer);
+          fitTimer = setTimeout(doFit, 200);
+        }
+        function doFit() {
           var overlay = document.querySelector('.publish-post-editor__overlay');
           if (!overlay) return;
           var scrollArea = overlay.querySelector('.publish-post-editor__scroll-area');
-          var toolbar   = overlay.querySelector('.editor-toolbar');
-          var cm        = overlay.querySelector('.CodeMirror');
+          var toolbar    = overlay.querySelector('.editor-toolbar');
+          var cm         = overlay.querySelector('.CodeMirror');
           if (!scrollArea || !cm) return;
-          var available = scrollArea.clientHeight - (toolbar ? toolbar.offsetHeight : 0);
-          if (available > 100) cm.style.minHeight = available + 'px';
+          var h = scrollArea.clientHeight - (toolbar ? toolbar.offsetHeight : 0);
+          if (h > 100) cm.style.minHeight = h + 'px';
         }
-        // Re-run whenever the DOM changes (editor mounts/unmounts) or window resizes.
-        new MutationObserver(fitEditor).observe(document.body, { subtree: true, childList: true });
-        window.addEventListener('resize', fitEditor);
-        fitEditor();
+        new MutationObserver(scheduleFit).observe(document.body, { subtree: true, childList: true });
+        window.addEventListener('resize', scheduleFit);
       })();
     `);
 
