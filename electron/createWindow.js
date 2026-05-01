@@ -179,7 +179,7 @@ export default appState => {
         border: none !important;
         border-radius: 0 !important;
         font-family: 'Arial Black', Arial, sans-serif !important;
-        font-size: 30pt !important;
+        font-size: 25pt !important;
         line-height: 1.5 !important;
       }
 
