@@ -323,10 +323,11 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
         ) : (
           <SimpleImageLink src={imgProps.src} alt={imgProps.alt} title={imgProps.title} />
         ),
-      // Task-list checkboxes: use defaultChecked so React doesn't treat them
-      // as controlled inputs (which requires onChange to show checked state).
+      // Task-list checkboxes: controlled with no-op onChange so React renders
+      // the checked state correctly; pointer-events:none prevents interaction.
+      // eslint-disable-next-line react/jsx-no-bind
       input: ({ type, checked }) =>
-        type === 'checkbox' ? <input type="checkbox" defaultChecked={checked} disabled /> : null,
+        type === 'checkbox' ? <input type="checkbox" checked={!!checked} onChange={() => {}} style={{ pointerEvents: 'none', cursor: 'default', marginRight: '4px', verticalAlign: 'middle' }} /> : null,
       // Renders raw HTML blocks in markdown posts only (stripped in comments/descriptions)
       rawhtml: ({ children }) => {
         if (!isMarkdownPost) return null;
