@@ -225,6 +225,35 @@
     padding: calc(var(--spacing-xxs) - 4px) calc(var(--spacing-xxs) * 3 / 4) calc(var(--spacing-xxs) - 6px);
   }
 
+  // Obsidian-style inline formatting
+  mark {
+    background-color: #fff88f;
+    color: #000;
+    border-radius: 2px;
+    padding: 0 2px;
+  }
+
+  del,
+  s {
+    opacity: 0.6;
+  }
+
+  sup {
+    vertical-align: super;
+    font-size: 0.75em;
+  }
+
+  sub {
+    vertical-align: sub;
+    font-size: 0.75em;
+  }
+
+  // GFM task-list checkboxes (read-only)
+  input[type='checkbox'] {
+    pointer-events: none;
+    margin-right: 4px;
+  }
+
   a {
     @extend .button--link;
   }

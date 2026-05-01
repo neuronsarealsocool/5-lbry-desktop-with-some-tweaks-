@@ -3,6 +3,7 @@ import { CHANNEL_STAKED_LEVEL_VIDEO_COMMENTS } from 'config';
 import { formattedLinks, inlineLinks } from 'util/remark-lbry';
 import { formattedTimestamp, inlineTimestamp } from 'util/remark-timestamp';
 import { formattedEmote, inlineEmote } from 'util/remark-emote';
+import { inlineMark, inlineSup, inlineSub } from 'util/remark-obsidian';
 import * as ICONS from 'constants/icons';
 import * as React from 'react';
 import Button from 'component/button';
@@ -137,7 +138,10 @@ schema.protocols.href.push('lbry');
 schema.attributes.a.push('embed');
 
 // Allow HTML layout/formatting tags
-schema.tagNames = [...schema.tagNames, 'center', 'iframe', 'mark', 'font', 'span', 'video', 'audio', 'source'];
+schema.tagNames = [...schema.tagNames, 'center', 'iframe', 'mark', 'font', 'span', 'video', 'audio', 'source', 'sup', 'sub', 'del', 's', 'input'];
+
+// Allow task-list checkboxes (read-only)
+schema.attributes.input = ['type', 'checked', 'disabled'];
 
 // Allow formatting/layout attributes on all elements
 schema.attributes['*'] = [...(schema.attributes['*'] || []), 'align', 'style', 'color', 'width', 'height'];
@@ -366,6 +370,10 @@ export default React.memo<MarkdownProps>(function MarkdownPreview(props: Markdow
           .use(inlineLinks)
           .use(disableTimestamps || isMarkdownPost ? null : inlineTimestamp)
           .use(disableTimestamps || isMarkdownPost ? null : formattedTimestamp)
+          // Obsidian-style formatting: ==highlight==, ^sup^, ~sub~
+          .use(inlineMark)
+          .use(inlineSup)
+          .use(inlineSub)
           // Emojis
           .use(inlineEmote)
           .use(formattedEmote)
