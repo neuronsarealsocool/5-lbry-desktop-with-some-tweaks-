@@ -249,9 +249,13 @@
   }
 
   // GFM task-list checkboxes (read-only)
+  // Restore checkbox appearance overridden by the global CSS reset
   input[type='checkbox'] {
+    -webkit-appearance: checkbox;
+    appearance: checkbox;
     pointer-events: none;
     margin-right: 4px;
+    vertical-align: middle;
   }
 
   a {
