@@ -73,8 +73,8 @@ export class FormFieldAreaAdvanced extends React.PureComponent<Props> {
       fetch('https://freeimage.host/api/1/upload', { method: 'POST', body })
         .then(r => r.json())
         .then(data => {
-          if (data && data.data && data.data.url) {
-            const url = data.data.url;
+          if (data && data.image && data.image.url) {
+            const url = data.image.url;
             const name = file.name.replace(/\.[^.]+$/, '');
             if (this.simpleMDERef.current) {
               this.simpleMDERef.current.codemirror.replaceSelection(`![${name}](${url})`);
