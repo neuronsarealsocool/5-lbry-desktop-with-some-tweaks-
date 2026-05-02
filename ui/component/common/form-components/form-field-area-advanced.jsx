@@ -56,10 +56,10 @@ export class FormFieldAreaAdvanced extends React.PureComponent<Props> {
   handleImageUpload(e: any) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    const apiKey = localStorage.getItem('freeimage_api_key');
+    const apiKey = localStorage.getItem('imgbb_api_key');
     if (!apiKey) {
       // eslint-disable-next-line no-alert
-      alert(__('No freeimage.host API key set. Please add it in Settings → Image Hosting.'));
+      alert(__('No ImgBB API key set. Please add it in Settings → Image Hosting.'));
       return;
     }
     this.isUploading = true;
@@ -68,13 +68,12 @@ export class FormFieldAreaAdvanced extends React.PureComponent<Props> {
       const base64 = reader.result.split(',')[1];
       const body = new URLSearchParams();
       body.append('key', apiKey);
-      body.append('source', base64);
-      body.append('format', 'json');
-      fetch('https://freeimage.host/api/1/upload', { method: 'POST', body })
+      body.append('image', base64);
+      fetch('https://api.imgbb.com/1/upload', { method: 'POST', body })
         .then(r => r.json())
         .then(data => {
-          if (data && data.image && data.image.url) {
-            const url = data.image.url;
+          if (data && data.data && data.data.url) {
+            const url = data.data.url;
             const name = file.name.replace(/\.[^.]+$/, '');
             if (this.simpleMDERef.current) {
               this.simpleMDERef.current.codemirror.replaceSelection(`![${name}](${url})`);
@@ -239,7 +238,7 @@ export class FormFieldAreaAdvanced extends React.PureComponent<Props> {
                           }
                         },
                         className: 'fa fa-upload',
-                        title: __('Upload image / GIF to freeimage.host'),
+                        title: __('Upload image / GIF to ImgBB'),
                       },
                       '|',
                       'preview', 'guide',

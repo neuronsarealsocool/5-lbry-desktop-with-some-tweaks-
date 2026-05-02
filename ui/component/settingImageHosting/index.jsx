@@ -2,14 +2,14 @@
 import * as React from 'react';
 import Button from 'component/button';
 import Card from 'component/common/card';
-import { FREEIMAGE_API_KEY } from 'constants/settings';
+import { IMGBB_API_KEY } from 'constants/settings';
 
 export default function SettingImageHosting() {
-  const [apiKey, setApiKey] = React.useState(() => localStorage.getItem(FREEIMAGE_API_KEY) || '');
+  const [apiKey, setApiKey] = React.useState(() => localStorage.getItem(IMGBB_API_KEY) || '');
   const [saved, setSaved] = React.useState(false);
 
   function handleSave() {
-    localStorage.setItem(FREEIMAGE_API_KEY, apiKey.trim());
+    localStorage.setItem(IMGBB_API_KEY, apiKey.trim());
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -17,17 +17,17 @@ export default function SettingImageHosting() {
   return (
     <Card
       title={__('Image Hosting')}
-      subtitle={__('freeimage.host API key — used by the image upload button in the post editor.')}
+      subtitle={__('ImgBB API key — used by the image upload button in the post editor. Get your key at imgbb.com/faq (API section).')}
       actions={
         <div className="section__actions">
-          <label htmlFor="freeimage-api-key" className="settings__label">
-            {__('freeimage.host API Key')}
+          <label htmlFor="imgbb-api-key" className="settings__label">
+            {__('ImgBB API Key')}
           </label>
           <input
-            id="freeimage-api-key"
+            id="imgbb-api-key"
             type="password"
             className="form-field__input"
-            placeholder={__('Paste your API key here')}
+            placeholder={__('Paste your ImgBB API key here')}
             value={apiKey}
             onChange={e => setApiKey(e.target.value)}
             style={{ maxWidth: '400px', marginBottom: '12px', display: 'block' }}
