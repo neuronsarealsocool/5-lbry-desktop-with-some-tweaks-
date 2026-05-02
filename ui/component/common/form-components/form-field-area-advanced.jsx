@@ -40,10 +40,61 @@ export class FormFieldAreaAdvanced extends React.PureComponent<Props> {
   static defaultProps = { labelOnLeft: false, blockWrap: true };
 
   input: { current: ElementRef<any> };
+  simpleMDERef: { current: any };
+  fileInputRef: { current: any };
+  isUploading: boolean;
 
   constructor(props: Props) {
     super(props);
     this.input = React.createRef();
+    this.simpleMDERef = React.createRef();
+    this.fileInputRef = React.createRef();
+    this.isUploading = false;
+    this.handleImageUpload = this.handleImageUpload.bind(this);
+  }
+
+  handleImageUpload(e: any) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const apiKey = localStorage.getItem('freeimage_api_key');
+    if (!apiKey) {
+      // eslint-disable-next-line no-alert
+      alert(__('No freeimage.host API key set. Please add it in Settings → Image Hosting.'));
+      return;
+    }
+    this.isUploading = true;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(',')[1];
+      const body = new URLSearchParams();
+      body.append('key', apiKey);
+      body.append('source', base64);
+      body.append('format', 'json');
+      fetch('https://freeimage.host/api/1/upload', { method: 'POST', body })
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.data && data.data.url) {
+            const url = data.data.url;
+            const name = file.name.replace(/\.[^.]+$/, '');
+            if (this.simpleMDERef.current) {
+              this.simpleMDERef.current.codemirror.replaceSelection(`![${name}](${url})`);
+            }
+          } else {
+            // eslint-disable-next-line no-alert
+            alert('Upload failed: ' + JSON.stringify(data));
+          }
+        })
+        .catch(err => {
+          // eslint-disable-next-line no-alert
+          alert('Upload error: ' + err.message);
+        })
+        .finally(() => {
+          this.isUploading = false;
+        });
+    };
+    reader.readAsDataURL(file);
+    // Reset so the same file can be re-selected
+    e.target.value = '';
   }
 
   componentDidMount() {
@@ -98,6 +149,9 @@ export class FormFieldAreaAdvanced extends React.PureComponent<Props> {
           const handleEvents = { contextmenu: openEditorMenu };
 
           const getInstance = (editor) => {
+            // Store editor ref for the image upload handler
+            this.simpleMDERef.current = editor;
+
             // SimpleMDE max char check
             editor.codemirror.on('beforeChange', (instance, changes) => {
               if (textAreaMaxLength && changes.update) {
@@ -172,6 +226,24 @@ export class FormFieldAreaAdvanced extends React.PureComponent<Props> {
                   options={{
                     spellChecker: true,
                     hideIcons: ['heading', 'image', 'fullscreen', 'side-by-side'],
+                    toolbar: [
+                      'bold', 'italic', 'strikethrough', '|',
+                      'heading-1', 'heading-2', 'heading-3', '|',
+                      'quote', 'unordered-list', 'ordered-list', '|',
+                      'link', 'table', 'horizontal-rule', '|',
+                      {
+                        name: 'upload-image',
+                        action: () => {
+                          if (!this.isUploading && this.fileInputRef.current) {
+                            this.fileInputRef.current.click();
+                          }
+                        },
+                        className: 'fa fa-upload',
+                        title: __('Upload image / GIF to freeimage.host'),
+                      },
+                      '|',
+                      'preview', 'guide',
+                    ],
                     previewRender(plainText) {
                       const preview = <MarkdownPreview content={plainText} noDataStore />;
                       return ReactDOMServer.renderToString(preview);
@@ -179,6 +251,13 @@ export class FormFieldAreaAdvanced extends React.PureComponent<Props> {
                   }}
                 />
                 {countInfo}
+                <input
+                  ref={this.fileInputRef}
+                  type="file"
+                  accept="image/*,.gif"
+                  style={{ display: 'none' }}
+                  onChange={this.handleImageUpload}
+                />
               </fieldset-section>
             </div>
           );

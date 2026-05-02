@@ -49,6 +49,8 @@ export const CUSTOM_SHARE_URL = 'custom_share_url';
 export const ENABLE_PRERELEASE_UPDATES = 'enable_prerelease_updates';
 export const DISABLE_AUTO_UPDATES = 'disable_auto_updates';
 
+export const FREEIMAGE_API_KEY = 'freeimage_api_key';
+
 export const SETTINGS_GRP = {
   APPEARANCE: 'appearance',
   ACCOUNT: 'account',
